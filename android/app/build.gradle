@@ -7,13 +7,13 @@ def releaseKey = System.getenv('KEYSTORE_FILE')
 def canSign = releaseKey && ['KEYSTORE_PASSWORD','KEY_ALIAS','KEY_PASSWORD'].every { System.getenv(it) }
 android {
     namespace 'ir.clockgame.fa'
-    compileSdk 35
-    ndkVersion flutter.ndkVersion
+    compileSdk 36
+    ndkVersion '27.0.12077973'
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = '17' }
     defaultConfig {
         applicationId 'ir.clockgame.fa'
-        minSdk 21
+        minSdk 24
         targetSdk 34
         versionCode flutter.versionCode
         versionName flutter.versionName
