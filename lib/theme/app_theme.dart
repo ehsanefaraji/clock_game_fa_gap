@@ -70,7 +70,7 @@ class _PlayButtonState extends State<PlayButton> with SingleTickerProviderStateM
           borderRadius:BorderRadius.circular(24),
           color:widget.action==null?const Color(0xFFEADFDB):widget.color,
           elevation:widget.action==null?0:6,
-          shadowColor:widget.action==null?Colors.transparent:widget.color.withValues(alpha: 0.4)
+          shadowColor:widget.action==null?Colors.transparent:widget.color.withValues(alpha: 0.4),
           child:InkWell(
             borderRadius:BorderRadius.circular(24),
             onTap:widget.action,
