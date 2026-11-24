@@ -8,7 +8,8 @@ class PlayerProgress {
   String wearing, daily;
   int get balance => coins - spent;
   int get total => stars.values.fold(0,(a,b)=>a+b);
-  bool open(int w,int l) => w == 0 && l == 0 || (l == 0 ? stars['${w-1}:9'] : stars['$w:${l-1}']) == 3;
+  // همهٔ مراحل همیشه باز هستند — قفل برداشته شد
+  bool open(int w,int l) => true;
   Map<String,dynamic> toJson()=> {'stars':stars,'owned':owned.toList(),'spent':spent,'coins':coins,'limit':limit,'music':music,'voice':voice,'effects':effects,'wearing':wearing,'daily':daily};
   factory PlayerProgress.fromJson(Map<String,dynamic> j)=> PlayerProgress(Map<String,int>.from(j['stars'] as Map), Set<String>.from(j['owned'] as List),j['spent'] as int,j['coins'] as int,j['limit'] as int,j['music'] as bool,j['voice'] as bool,j['effects'] as bool,j['wearing'] as String,j['daily'] as String);
 }

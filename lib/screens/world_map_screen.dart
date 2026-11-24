@@ -8,13 +8,13 @@ import 'level_screen.dart';
 
 class WorldMapScreen extends StatelessWidget {
   const WorldMapScreen({super.key});
-  @override Widget build(BuildContext context){final g=GameScope.of(context);return Sky(title:'نقشهٔ دنیاها',child:Pad(children:[const Text('با سه ستاره، راه مرحلهٔ بعد را باز کن!'),for(var i=0;i<worlds.length;i++)PlayButton(worlds[i]+(g.p.open(i,0)?'':' • قفل'),g.locked||!g.p.open(i,0)?null:()=>go(context,_Trail(i)),color:Color.alphaBlend(worldColors[i].withAlpha(100),paper)),if(g.p.stars['0:9']==3)const Text('نشان استاد ساعت'),if(g.p.stars['3:9']==3)const Text('نشان دقیقه‌شناس'),if(g.p.stars['4:9']==3)const Text('نشان قهرمان زمان')]));}
+  @override Widget build(BuildContext context){final g=GameScope.of(context);return Sky(title:'نقشهٔ دنیاها',child:Pad(children:[const Text('همهٔ دنیاها باز هستند! هر کدام را دوست داری انتخاب کن 🌈'),for(var i=0;i<worlds.length;i++)PlayButton(worlds[i]+(g.p.open(i,0)?'':' • قفل'),g.locked?null:()=>go(context,_Trail(i)),color:Color.alphaBlend(worldColors[i].withAlpha(100),paper)),if(g.p.stars['0:9']==3)const Text('نشان استاد ساعت'),if(g.p.stars['3:9']==3)const Text('نشان دقیقه‌شناس'),if(g.p.stars['4:9']==3)const Text('نشان قهرمان زمان')]));}
 }
 class _Trail extends StatelessWidget {
   const _Trail(this.world);
   final int world;
   static double path(int i)=>sin(i*.88)*.68;
-  @override Widget build(BuildContext context){final g=GameScope.of(context);final color=worldColors[world];return Sky(title:worlds[world],child:SingleChildScrollView(padding:const EdgeInsets.all(14),child:CustomPaint(painter:_Dotted(color),child:Column(children:[for(var i=0;i<10;i++) SizedBox(height:102,child:Align(alignment:Alignment(path(i),0),child:SizedBox(width:140,child:PlayButton('مرحلهٔ ${fa(i+1)}\n${g.p.open(world,i)?'★ ${fa(g.p.stars['$world:$i']??0)}':'قفل'}',g.locked||!g.p.open(world,i)?null:()=>go(context,LevelScreen(world,i,Mode.story)),color:Color.alphaBlend(color.withAlpha(130),paper)))))]))));}
+  @override Widget build(BuildContext context){final g=GameScope.of(context);final color=worldColors[world];return Sky(title:worlds[world],child:SingleChildScrollView(padding:const EdgeInsets.all(14),child:CustomPaint(painter:_Dotted(color),child:Column(children:[for(var i=0;i<10;i++) SizedBox(height:102,child:Align(alignment:Alignment(path(i),0),child:SizedBox(width:140,child:PlayButton('مرحلهٔ ${fa(i+1)}\n${g.p.open(world,i)?'★ ${fa(g.p.stars['$world:$i']??0)}':'قفل'}',g.locked?null:()=>go(context,LevelScreen(world,i,Mode.story)),color:Color.alphaBlend(color.withAlpha(130),paper)))))]))));}
 }
 class _Dotted extends CustomPainter {
   _Dotted(this.color);
