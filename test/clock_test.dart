@@ -19,12 +19,19 @@ void main() {
       }
     }
   });
-  test('requires three stars and persists profile fields', () {
+  test('all levels unlocked and profile fields persist', () {
     final p=PlayerProgress.empty();
-    expect(p.open(0,0),isTrue);expect(p.open(0,1),isFalse);
-    p.stars['0:0']=2;expect(p.open(0,1),isFalse);
+    // همهٔ مراحل همیشه باز هستند (قفل برداشته شد)
+    expect(p.open(0,0),isTrue);
+    expect(p.open(0,1),isTrue);
+    expect(p.open(1,0),isTrue);
+    expect(p.open(4,9),isTrue);
+    // ذخیره و بارگذاری پروفایل
     p.stars['0:0']=3;p.stars['0:9']=3;p.coins=70;p.owned.add('hat');p.spent=60;
     final copy=PlayerProgress.fromJson(p.toJson());
-    expect(copy.open(0,1),isTrue);expect(copy.open(1,0),isTrue);expect(copy.balance,10);expect(copy.owned,contains('hat'));
+    expect(copy.open(0,1),isTrue);
+    expect(copy.open(1,0),isTrue);
+    expect(copy.balance,10);
+    expect(copy.owned,contains('hat'));
   });
 }
