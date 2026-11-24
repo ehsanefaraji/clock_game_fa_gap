@@ -1,0 +1,33 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'dev.flutter.flutter-gradle-plugin'
+}
+def releaseKey = System.getenv('KEYSTORE_FILE')
+def canSign = releaseKey && ['KEYSTORE_PASSWORD','KEY_ALIAS','KEY_PASSWORD'].every { System.getenv(it) }
+android {
+    namespace 'ir.clockgame.fa'
+    compileSdk 35
+    ndkVersion flutter.ndkVersion
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    kotlinOptions { jvmTarget = '17' }
+    defaultConfig {
+        applicationId 'ir.clockgame.fa'
+        minSdk 21
+        targetSdk 34
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+    signingConfigs {
+        if (canSign) {
+            release {
+                storeFile file(releaseKey)
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEY_PASSWORD')
+            }
+        }
+    }
+    buildTypes { release { if (canSign) signingConfig signingConfigs.release } }
+}
+flutter { source '../..' }

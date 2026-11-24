@@ -1,0 +1,31 @@
+name: clock_game_fa
+description: Persian analog clock learning game
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_tts: ^4.0.2
+  shared_preferences: ^2.2.0
+  lottie: ^3.1.0
+  audioplayers: ^6.0.0
+  confetti: ^0.7.0
+  google_fonts: ^6.1.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/audio/
+    - assets/animations/
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
+        - asset: assets/fonts/Vazirmatn-Bold.ttf
+          weight: 700
