@@ -19,14 +19,34 @@ void main() {
       }
     }
   });
+  test('taskFilter generates only specified task type', () {
+    final readQs=Question.make(0,0,5,Random(42),taskFilter:Task.read);
+    for(final q in readQs) expect(q.task,Task.read);
+    final setQs=Question.make(0,0,5,Random(42),taskFilter:Task.set);
+    for(final q in setQs) expect(q.task,Task.set);
+    final mathQs=Question.make(4,5,5,Random(42),taskFilter:Task.math);
+    for(final q in mathQs) expect(q.task,Task.math);
+  });
+  test('distractors have varied hours and minutes', () {
+    for(var w=0;w<5;w++){
+      for(var l=0;l<5;l++){
+        final qs=Question.make(w,l,5,Random(w*100+l));
+        for(final q in qs){
+          final hours=q.options.map((t)=>t~/60).toSet();
+          final mins=q.options.map((t)=>t%60).toSet();
+          // حداقل ۲ ساعت متفاوت و ۲ دقیقهٔ متفاوت در گزینه‌ها
+          expect(hours.length,greaterThanOrEqualTo(2));
+          expect(mins.length,greaterThanOrEqualTo(2));
+        }
+      }
+    }
+  });
   test('all levels unlocked and profile fields persist', () {
     final p=PlayerProgress.empty();
-    // همهٔ مراحل همیشه باز هستند (قفل برداشته شد)
     expect(p.open(0,0),isTrue);
     expect(p.open(0,1),isTrue);
     expect(p.open(1,0),isTrue);
     expect(p.open(4,9),isTrue);
-    // ذخیره و بارگذاری پروفایل
     p.stars['0:0']=3;p.stars['0:9']=3;p.coins=70;p.owned.add('hat');p.spent=60;
     final copy=PlayerProgress.fromJson(p.toJson());
     expect(copy.open(0,1),isTrue);

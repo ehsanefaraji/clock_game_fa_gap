@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 const ink = Color(0xFF3D2C1E);
 const paper = Color(0xFFFFFAEE);
-// رنگ‌های فانتزی جدید
+// رنگ‌های فانتزی
 const magicPurple = Color(0xFF6C5CE7);
 const magicPink = Color(0xFFFD79A8);
 const magicBlue = Color(0xFF74B9FF);
 const magicGreen = Color(0xFF55EFC4);
 const magicOrange = Color(0xFFFFA502);
 const magicYellow = Color(0xFFFFD93D);
+// پس‌زمینه‌های فانتزی هر دنیا
+const worldBgAssets = [
+  'assets/images/world_forest.png',
+  'assets/images/world_sky.png',
+  'assets/images/world_castle.png',
+  'assets/images/world_workshop.png',
+  'assets/images/world_time.png',
+];
 
 ThemeData theme() {
   final base = ThemeData(useMaterial3:true,fontFamily:'Vazirmatn',colorScheme:ColorScheme.fromSeed(seedColor:magicPurple).copyWith(onSurface:ink),scaffoldBackgroundColor:Colors.transparent);
@@ -15,28 +23,27 @@ ThemeData theme() {
 }
 
 class Sky extends StatelessWidget {
-  const Sky({super.key,required this.title,required this.child});
+  const Sky({super.key,required this.title,required this.child,this.world = -1});
   final String title;
   final Widget child;
-  @override Widget build(BuildContext context) => DecoratedBox(
-    decoration:const BoxDecoration(
-      gradient:LinearGradient(
-        begin:Alignment.topCenter,
-        end:Alignment.bottomCenter,
-        colors:[
-          Color(0xFFA29BFE),  // بنفش روشن بالا
-          Color(0xFFDFE6FD),  // بنفش کم‌رنگ
-          Color(0xFFFFEAA7),  // زرد کرم
-          Color(0xFFFAB1A0),  // صورتی گرم پایین
-        ],
-        stops:[0.0,0.3,0.7,1.0],
+  final int world; // -1 = default, 0-4 = world background
+  @override Widget build(BuildContext context) {
+    final bg = world >= 0 && world < worldBgAssets.length ? worldBgAssets[world] : null;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        image: bg != null ? DecorationImage(image: AssetImage(bg), fit: BoxFit.cover) : null,
+        gradient: bg == null ? const LinearGradient(
+          begin:Alignment.topCenter, end:Alignment.bottomCenter,
+          colors:[Color(0xFFA29BFE), Color(0xFFDFE6FD), Color(0xFFFFEAA7), Color(0xFFFAB1A0)],
+          stops:[0.0, 0.3, 0.7, 1.0],
+        ) : null,
       ),
-    ),
-    child:Scaffold(
-      appBar:AppBar(title:Text(title)),
-      body:SafeArea(child:Center(child:ConstrainedBox(constraints:const BoxConstraints(maxWidth:630),child:child))),
-    ),
-  );
+      child: Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: SafeArea(child: Center(child: ConstrainedBox(constraints:const BoxConstraints(maxWidth:630), child: child))),
+      ),
+    );
+  }
 }
 class Pad extends StatelessWidget {
   const Pad({super.key,required this.children});

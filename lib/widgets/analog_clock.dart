@@ -17,11 +17,17 @@ class _AnalogClockState extends State<AnalogClock> with SingleTickerProviderStat
   double get value=>from+(to-from)*Curves.easeInOut.transform(a.value);
   void drag(Offset point,double side,{bool start=false}){
     final v=point-Offset(side/2,side/2); if(v.distance<12)return;
-    if(start) hour=v.distance<side*.29;
+    // آستانه درگ: نصف شعاع = مرز بین عقربه ساعت و دقیقه
+    // قبلاً side*.29 بود که خیلی کوچک بود و عقربه ساعت در ۱۰۰-۱۴۲px را به‌اشتباه
+    // عقربه دقیقه تشخیص می‌داد. حالا side*.42 (~130px) که بین طول عقربه ساعت (142px)
+    // و عقربه دقیقه (200px) است.
+    if(start) hour=v.distance<side*.42;
     final turn=(atan2(v.dx,-v.dy)/(2*pi))%1;
     final time=widget.time;
     final minute=(turn*12).round()%12*5;
-    widget.edit?.call(hour ? wrapTime((turn*12-(time%60)/60).round()*60 + time%60) : wrapTime(time~/60*60+minute));
+    // وقتی عقربه ساعت کشیده می‌شود، دقیقه‌های فعلی حفظ شوند (مثل ساعت واقعی)
+    // عقربه ساعت با توجه به دقیقه‌ها کمی جلو/عقب می‌شود
+    widget.edit?.call(hour ? wrapTime((turn*12).round()%12*60 + time%60) : wrapTime(time~/60*60+minute));
   }
   @override void dispose(){a.dispose();super.dispose();}
   @override Widget build(BuildContext context)=>Center(child:LayoutBuilder(builder:(context,c){final side=min(310.0,c.maxWidth);return Semantics(image:widget.edit==null,label:widget.reveal?'ساعت روی ${words(widget.time)}':'صفحهٔ ساعت؛ از راهنمای عقربه‌ها استفاده کن',child:GestureDetector(excludeFromSemantics:true,onPanStart:widget.edit==null?null:(d)=>drag(d.localPosition,side,start:true),onPanUpdate:widget.edit==null?null:(d)=>drag(d.localPosition,side),child:SizedBox.square(dimension:side,child:AnimatedBuilder(animation:a,builder:(context,_)=>CustomPaint(painter:_Clock(value))))));}));
