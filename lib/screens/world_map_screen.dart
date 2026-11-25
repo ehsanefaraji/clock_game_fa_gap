@@ -7,15 +7,6 @@ import '../theme/app_theme.dart';
 import 'level_screen.dart';
 import '../widgets/owl_character.dart';
 
-int _nextLevel(Map<String,int> stars, int world) {
-  for (var target = 1; target <= 3; target += 2) {
-    for (var i = 0; i < 10; i++) {
-      if ((stars['$world:$i'] ?? 0) < target) return i;
-    }
-  }
-  return 9;
-}
-
 const worldEmojis = ['🌲','☁️','🏰','⚙️','⏰'];
 const worldDescriptions = [
   'ساعت‌های کامل را یاد بگیر',
@@ -30,7 +21,7 @@ class WorldMapScreen extends StatelessWidget {
   @override Widget build(BuildContext context){
     final g=GameScope.of(context);
     return Sky(title:'🗺️ نقشهٔ دنیاها',child:ListView(padding:const EdgeInsets.fromLTRB(18,12,18,24),children:[
-      PlayButton('ادامهٔ بازی',g.locked?null:()=>go(context,LevelScreen(g.p.lastWorld,_nextLevel(g.p.stars,g.p.lastWorld),Mode.story))),
+      PlayButton('ادامهٔ بازی',g.locked?null:()=>go(context,LevelScreen(g.p.lastWorld,g.p.nextStoryLevel,Mode.story))),
       const SizedBox(height:12),
       for(var i=0;i<worlds.length;i++)...[
         Align(alignment:i.isEven?Alignment.centerRight:Alignment.centerLeft,child:FractionallySizedBox(widthFactor:.91,child:_WorldCard(
@@ -45,9 +36,9 @@ class WorldMapScreen extends StatelessWidget {
         ))),
         if(i<worlds.length-1)SizedBox(height:31,child:CustomPaint(painter:_WorldConnector(i.isEven))),
       ],
-      if(g.p.stars['0:9']==3) _BadgeCard('🏅','نشان استاد ساعت','همهٔ مراحل جنگل را با سه ستاره کامل کردی',const Color(0xFF00B894)),
-      if(g.p.stars['3:9']==3) _BadgeCard('🏅','نشان دقیقه‌شناس','همهٔ مراحل دقیقه‌ها را با سه ستاره کامل کردی',const Color(0xFF0984E3)),
-      if(g.p.stars['4:9']==3) _BadgeCard('🏅','نشان قهرمان زمان','همهٔ چالش‌ها را با سه ستاره کامل کردی',const Color(0xFFEF476F)),
+      if(g.p.completedWorld(0)) _BadgeCard('🏅','نشان استاد ساعت','همهٔ مراحل جنگل را کامل کردی',const Color(0xFF00B894)),
+      if(g.p.completedWorld(3)) _BadgeCard('🏅','نشان دقیقه‌شناس','همهٔ مراحل دقیقه‌ها را کامل کردی',const Color(0xFF0984E3)),
+      if(g.p.completedWorld(4)) _BadgeCard('🏅','نشان قهرمان زمان','همهٔ چالش‌ها را کامل کردی',const Color(0xFFEF476F)),
     ]));
   }
 }
@@ -76,7 +67,7 @@ class _WorldCard extends StatelessWidget {
   final VoidCallback? onTap;
   const _WorldCard({required this.index,required this.name,required this.wearing,required this.current,required this.description,required this.color,required this.stars,required this.onTap});
   @override Widget build(BuildContext context){
-    final totalStars = List.generate(10,(l)=>stars['$index:$l']??0).fold<int>(0,(a,b)=>a+b);
+    final totalStars = List.generate(storyLevelsPerWorld,(l)=>stars['$index:$l']??0).fold<int>(0,(a,b)=>a+b);
     return Container(
       margin:const EdgeInsets.only(bottom:8),
       decoration:BoxDecoration(
@@ -114,7 +105,7 @@ class _WorldCard extends StatelessWidget {
                         children:[
                           const Icon(Icons.star,color:Color(0xFFFFD93D),size:16),
                           const SizedBox(width:4),
-                          Text('${fa(totalStars)} / ۳۰ ستاره',style:const TextStyle(fontSize:12,color:ink,fontWeight:FontWeight.bold)),
+                          Text('${fa(totalStars)} / ${fa(3 * storyLevelsPerWorld)} ستاره',style:const TextStyle(fontSize:12,color:ink,fontWeight:FontWeight.bold)),
                         ],
                       ),
                     ],
@@ -170,7 +161,7 @@ class _Trail extends StatelessWidget {
       child:CustomPaint(
         painter:_FantasyPath(color,world),
         child:Column(children:[
-          for(var i=0;i<10;i++)
+          for(var i=0;i<storyLevelsPerWorld;i++)
             SizedBox(height:100,child:Align(alignment:Alignment(pathX(i,world),0),child:_LevelNode(
               world:world,level:i,color:color,stars:g.p.stars['$world:$i']??0,
               onTap:g.locked?null:()=>go(context,LevelScreen(world,i,Mode.story)),
@@ -192,9 +183,9 @@ class _LevelNode extends StatelessWidget {
     child:Container(
       padding:const EdgeInsets.symmetric(vertical:10,horizontal:14),
       decoration:BoxDecoration(
-        gradient:LinearGradient(colors:[color.withValues(alpha:0.9),color.withValues(alpha:0.65)]),
+        gradient:LinearGradient(colors:[paper,Color.lerp(paper,color,.34)!]),
         borderRadius:BorderRadius.circular(20),
-        border:Border.all(color:Colors.white,width:2.5),
+        border:Border.all(color:const Color(0xFFBA8547),width:2.5),
         boxShadow:[
           BoxShadow(color:color.withValues(alpha:0.4),offset:const Offset(0,5),blurRadius:10),
           BoxShadow(color:Colors.white.withValues(alpha:0.2),offset:const Offset(0,2),blurRadius:4),
@@ -203,13 +194,13 @@ class _LevelNode extends StatelessWidget {
       child:Column(
         mainAxisSize:MainAxisSize.min,
         children:[
-          Text(worldEmojis[world],style:const TextStyle(fontSize:20)),
-          Text('مرحله ${fa(level+1)}',style:const TextStyle(fontSize:16,fontWeight:FontWeight.bold,color:Colors.white)),
+          Text(level==storyLevelsPerWorld-1?'👑':'✦ ${worldEmojis[world]} ✦',style:const TextStyle(fontSize:20,color:Color(0xFF8C531F))),
+          Text('مرحله ${fa(level+1)}',style:const TextStyle(fontFamily:'Lalezar',fontSize:21,height:1.15,color:ink)),
           Row(
             mainAxisAlignment:MainAxisAlignment.center,
             children:List.generate(3,(s)=>Padding(
               padding:const EdgeInsets.symmetric(horizontal:1),
-              child:Icon(s<stars?Icons.star:Icons.star_border,color:const Color(0xFFFFD93D),size:16),
+              child:Icon(s<stars?Icons.star:Icons.star_border,color:const Color(0xFF92561B),size:16),
             )),
           ),
         ],
@@ -226,7 +217,7 @@ class _FantasyPath extends CustomPainter {
     final p=Path();
     Offset pt(int i)=>Offset(size.width/2+_Trail.pathX(i,world)*(size.width-150)/2,50.0+i*100);
     p.moveTo(pt(0).dx,pt(0).dy);
-    for(var i=1;i<10;i++){
+    for(var i=1;i<storyLevelsPerWorld;i++){
       final a=pt(i-1),b=pt(i);
       p.cubicTo(a.dx,a.dy+50,b.dx,b.dy-50,b.dx,b.dy);
     }
@@ -241,7 +232,8 @@ class _FantasyPath extends CustomPainter {
       // ستاره‌های درخشان روی مسیر
       for(double d=15;d<m.length;d+=40){
         final pos=m.getTangentForOffset(d)!.position;
-        canvas.drawCircle(pos,1.5,Paint()..color=Colors.white.withValues(alpha:0.8));
+        final twinkle=Path()..moveTo(pos.dx,pos.dy-5)..lineTo(pos.dx+3,pos.dy)..lineTo(pos.dx,pos.dy+5)..lineTo(pos.dx-3,pos.dy)..close();
+        canvas.drawPath(twinkle,Paint()..color=const Color(0xFFFFCF70));
       }
     }
   }

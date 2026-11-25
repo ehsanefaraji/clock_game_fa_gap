@@ -19,6 +19,16 @@ void main() {
       }
     }
   });
+  test('every map stage mixes five distinct read and set questions', () {
+    for (var w=0; w<5; w++) {
+      for (var l=0; l<storyLevelsPerWorld; l++) {
+        final qs=Question.story(w,l,Random(w*100+l));
+        expect(qs.map((q)=>q.answer).toSet(),hasLength(5));
+        expect(qs.where((q)=>q.task==Task.read),hasLength(l.isEven?3:2));
+        expect(qs.where((q)=>q.task==Task.set),hasLength(l.isEven?2:3));
+      }
+    }
+  });
   test('taskFilter generates only specified task type', () {
     final readQs=Question.make(0,0,5,Random(42),taskFilter:Task.read);
     for(final q in readQs) expect(q.task,Task.read);
@@ -47,6 +57,8 @@ void main() {
     expect(p.completedWorld(3),isFalse);
     expect(p.nextStoryLevel,9);
     p.stars['3:9']=1;
+    expect(p.nextStoryLevel,10);
+    for(var i=10;i<storyLevelsPerWorld;i++){p.stars['3:$i']=1;}
     final restored=PlayerProgress.fromJson(p.toJson());
     expect(restored.lastWorld,3);
     expect(restored.completedWorld(3),isTrue);

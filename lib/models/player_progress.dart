@@ -1,3 +1,5 @@
+import 'question.dart';
+
 class PlayerProgress {
   PlayerProgress(this.stars, this.owned, this.spent, this.coins, this.limit, this.music, this.voice, this.effects, this.wearing, this.daily);
   PlayerProgress.empty():this({}, {}, 0, 0, 0, true, true, true, '', '');
@@ -7,14 +9,14 @@ class PlayerProgress {
   bool music, voice, effects;
   String wearing, daily;
   int lastWorld = 0;
-  bool completedWorld(int world) => List.generate(10, (i) => stars['$world:$i'] ?? 0).every((count) => count > 0);
+  bool completedWorld(int world) => List.generate(storyLevelsPerWorld, (i) => stars['$world:$i'] ?? 0).every((count) => count > 0);
   int get nextStoryLevel {
     for (final minimum in [1, 3]) {
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < storyLevelsPerWorld; i++) {
         if ((stars['$lastWorld:$i'] ?? 0) < minimum) return i;
       }
     }
-    return 9;
+    return storyLevelsPerWorld - 1;
   }
   int get balance => coins - spent;
   int get total => stars.values.fold(0,(a,b)=>a+b);

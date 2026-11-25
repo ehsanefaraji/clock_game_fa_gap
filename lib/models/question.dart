@@ -18,17 +18,23 @@ String words(int t) {
   };
 }
 String digital(int t) { final w = wrapTime(t); return fa('${(w ~/ 60) % 12 == 0 ? 12 : (w ~/ 60) % 12}:${(w % 60).toString().padLeft(2,'0')}'); }
+const storyLevelsPerWorld = 12;
+
 enum Task { read, set, math }
 class Question {
   const Question(this.answer, this.task, this.options, {this.start = 0, this.delta = 0});
   final int answer, start, delta;
   final Task task;
   final List<int> options;
-  static List<Question> make(int world, int level, int count, Random random, {Task? taskFilter}) {
+  static List<Question> story(int world, int level, Random random) {
+    final tasks = [Task.read, Task.set, Task.read, Task.set, level.isEven ? Task.read : Task.set];
+    return make(world, level, tasks.length, random, sequence: tasks);
+  }
+  static List<Question> make(int world, int level, int count, Random random, {Task? taskFilter, List<Task>? sequence}) {
     final offsets = <List<int>>[[0],[30],[15,45],[5,10,20,25,35,40,50,55],List.generate(12,(i)=>i*5)][world];
     final used = <int>{};
     return List.generate(count, (i) {
-      final task = taskFilter ?? (world == 4 && (i % 2 == 1 || level > 5 && i % 3 == 0) ? Task.math : (level > 1 && (i + level) % 3 == 0 ? Task.set : Task.read));
+      final task = sequence?[i] ?? taskFilter ?? (world == 4 && (i % 2 == 1 || level > 5 && i % 3 == 0) ? Task.math : (level > 1 && (i + level) % 3 == 0 ? Task.set : Task.read));
       int start, answer, delta;
       do {
         start = random.nextInt(12)*60 + offsets[random.nextInt(offsets.length)];
