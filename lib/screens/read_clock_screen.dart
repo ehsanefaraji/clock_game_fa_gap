@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import '../models/question.dart';
 import '../theme/app_theme.dart';
@@ -8,179 +7,100 @@ class ReadClockScreen extends StatelessWidget {
   const ReadClockScreen(this.q, this.answer, {super.key});
   final Question q;
   final ValueChanged<int>? answer;
-  @override Widget build(BuildContext context) {
-    final on = answer != null;
-    return Column(children: [
-      // ساعت داخل کارت شناور
-      _PopupCard(child: AnalogClock(time: q.answer)),
-      const SizedBox(height: 10),
-      // گزینه‌ها داخل کارت شناور
-      _PopupCard(child: Column(children: [
-        for (final t in q.options) Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: _OptionButton(
-            text: words(t),
-            onTap: on ? () => answer!(t) : null,
-            isAnswer: t == q.answer,
-            enabled: on,
-          ),
-        ),
-      ])),
-    ]);
-  }
+  @override
+  Widget build(BuildContext context) => _ClockChoices(q, q.answer, false, answer);
 }
 
 class TimeMathScreen extends StatelessWidget {
   const TimeMathScreen(this.q, this.answer, {super.key});
   final Question q;
   final ValueChanged<int>? answer;
-  @override Widget build(BuildContext context) {
-    final on = answer != null;
-    return Column(children: [
-      // ساعت شروع داخل کارت
-      _PopupCard(child: Column(children: [
-        AnalogClock(time: q.start, reveal: true),
-      ])),
-      const SizedBox(height: 10),
-      // گزینه‌ها داخل کارت
-      _PopupCard(child: Column(children: [
-        for (final t in q.options) Padding(
-          padding: const EdgeInsets.only(bottom: 6),
-          child: _OptionButton(
-            text: words(t),
-            onTap: on ? () => answer!(t) : null,
-            isAnswer: t == q.answer,
-            enabled: on,
-          ),
-        ),
-      ])),
-    ]);
-  }
+  @override
+  Widget build(BuildContext context) => _ClockChoices(q, q.start, true, answer);
+}
+
+class _ClockChoices extends StatelessWidget {
+  const _ClockChoices(this.q, this.time, this.reveal, this.answer);
+  final Question q;
+  final int time;
+  final bool reveal;
+  final ValueChanged<int>? answer;
+  @override
+  Widget build(BuildContext context) => _Panel(child: Column(children: [
+    AnalogClock(time: time, reveal: reveal),
+    const SizedBox(height: 8),
+    _Pairs(children: [for (final t in q.options) _Choice(words(t), answer == null ? null : () => answer?.call(t), correct: answer == null && t == q.answer)]),
+  ]));
 }
 
 class SetClockScreen extends StatefulWidget {
-  const SetClockScreen(this.answer, {super.key});
+  const SetClockScreen(this.answer, {super.key, required this.target});
+  final int target;
   final ValueChanged<int>? answer;
-  @override State<SetClockScreen> createState() => _SetClockScreenState();
+  @override
+  State<SetClockScreen> createState() => _SetClockScreenState();
 }
 
 class _SetClockScreenState extends State<SetClockScreen> {
-  int t = 0;
-  void update(int next) => setState(() => t = wrapTime(next));
-  @override Widget build(BuildContext context) {
+  late int t = widget.target == 0 ? 60 : 0;
+  void update(int next, {bool commit = true}) {
+    if (widget.answer == null) return;
+    setState(() => t = wrapTime(next));
+    if (commit) check();
+  }
+  void check() { if (t == widget.target) widget.answer?.call(t); }
+  @override
+  Widget build(BuildContext context) {
     final on = widget.answer != null;
-    return Column(children: [
-      // ساعت تعاملی داخل کارت
-      _PopupCard(child: Column(children: [
-        AnalogClock(time: t, reveal: true, edit: on ? update : null),
-        Text(digital(t), textDirection: TextDirection.ltr,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: ink)),
-      ])),
-      const SizedBox(height: 10),
-      // دکمه‌ها داخل کارت
-      _PopupCard(child: Column(children: [
-        const Text('عقربه را بکش یا از دکمه‌ها کمک بگیر.', textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
-        Row(children: [
-          Expanded(child: _SmallButton('⬅ ساعت جلو', on ? () => update(t + 60) : null)),
-          const SizedBox(width: 6),
-          Expanded(child: _SmallButton('⬅ ۵ دقیقه', on ? () => update(t + 5) : null)),
-        ]),
-        Row(children: [
-          Expanded(child: _SmallButton('➡ ساعت عقب', on ? () => update(t - 60) : null)),
-          const SizedBox(width: 6),
-          Expanded(child: _SmallButton('➡ ۵ دقیقه', on ? () => update(t - 5) : null)),
-        ]),
-        const SizedBox(height: 10),
-        _OptionButton(text: '✅ بررسی ساعت', onTap: on ? () => widget.answer!(t) : null, isAnswer: false, enabled: on),
-      ])),
-    ]);
+    return _Panel(child: Column(children: [
+      AnalogClock(time: t, reveal: true, edit: on ? (next) => update(next, commit: false) : null, editEnd: check),
+      Text(digital(t), textDirection: TextDirection.ltr, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+      const SizedBox(height: 4),
+      const Text('عقربه را بکش یا از دکمه‌ها کمک بگیر.', textAlign: TextAlign.center, style: TextStyle(fontSize: 13)),
+      const SizedBox(height: 8),
+      _Pairs(children: [
+        _Choice('یک ساعت جلو', on ? () => update(t + 60) : null),
+        _Choice('۵ دقیقه جلو', on ? () => update(t + 5) : null),
+        _Choice('یک ساعت عقب', on ? () => update(t - 60) : null),
+        _Choice('۵ دقیقه عقب', on ? () => update(t - 5) : null),
+      ]),
+    ]));
   }
 }
 
-// --- Widgets ---
-
-class _PopupCard extends StatelessWidget {
-  const _PopupCard({required this.child});
+class _Panel extends StatelessWidget {
+  const _Panel({required this.child});
   final Widget child;
-  @override Widget build(BuildContext context) => Container(
-    width: double.infinity,
-    margin: const EdgeInsets.symmetric(horizontal: 4),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(24),
-      boxShadow: [
-        BoxShadow(color: Colors.black.withValues(alpha: 0.15), offset: const Offset(0, 4), blurRadius: 12),
-        BoxShadow(color: Colors.white.withValues(alpha: 0.3), offset: const Offset(0, 2), blurRadius: 4),
-      ],
-      border: Border.all(color: Colors.white, width: 2),
-    ),
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(color: paper, borderRadius: BorderRadius.circular(24), border: Border.all(color: const Color(0xFFE2BD90)), boxShadow: const [BoxShadow(color: Color(0x503D2C1E), offset: Offset(0, 4), blurRadius: 12)]),
     child: child,
   );
 }
 
-class _OptionButton extends StatefulWidget {
-  const _OptionButton({required this.text, required this.onTap, required this.isAnswer, required this.enabled});
-  final String text;
-  final VoidCallback? onTap;
-  final bool isAnswer;
-  final bool enabled;
-  @override State<_OptionButton> createState() => _OptionButtonState();
+class _Pairs extends StatelessWidget {
+  const _Pairs({required this.children});
+  final List<Widget> children;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, c) {
+    final width = c.maxWidth < 270 || MediaQuery.textScalerOf(context).scale(16) > 22 ? c.maxWidth : (c.maxWidth - 8) / 2;
+    return Wrap(spacing: 8, runSpacing: 8, children: [for (final child in children) SizedBox(width: width, child: child)]);
+  });
 }
 
-class _OptionButtonState extends State<_OptionButton> with SingleTickerProviderStateMixin {
-  late final AnimationController _shake = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
-  @override void dispose() { _shake.dispose(); super.dispose(); }
-  @override Widget build(BuildContext context) => AnimatedBuilder(
-    animation: _shake,
-    builder: (context, child) => Transform.translate(
-      offset: Offset(sin(_shake.value * pi * 6) * 4 * (1 - _shake.value), 0),
-      child: child,
-    ),
-    child: SizedBox(
-      width: double.infinity,
-      height: 54,
-      child: Material(
-        color: widget.onTap == null ? const Color(0xFFEADFDB) : const Color(0xFFFFD93D),
-        borderRadius: BorderRadius.circular(16),
-        elevation: widget.onTap == null ? 0 : 3,
-        shadowColor: const Color(0x40774664),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: widget.onTap,
-          child: Center(child: Text(
-            widget.text,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: ink,
-              height: 1.3,
-            ),
-          )),
-        ),
-      ),
-    ),
-  );
-}
-
-class _SmallButton extends StatelessWidget {
-  const _SmallButton(this.label, this.onTap);
+class _Choice extends StatelessWidget {
+  const _Choice(this.label, this.action, {this.correct = false});
   final String label;
-  final VoidCallback? onTap;
-  @override Widget build(BuildContext context) => SizedBox(
-    height: 44,
-    child: Material(
-      color: onTap == null ? const Color(0xFFEADFDB) : paper,
-      borderRadius: BorderRadius.circular(12),
-      elevation: onTap == null ? 0 : 2,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Center(child: Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: ink))),
-      ),
-    ),
+  final VoidCallback? action;
+  final bool correct;
+  @override
+  Widget build(BuildContext context) => FilledButton(
+    onPressed: action,
+    style: FilledButton.styleFrom(backgroundColor: const Color(0xFFFFDC91), foregroundColor: ink,
+      disabledBackgroundColor: correct ? const Color(0xFFBDDFB5) : const Color(0xFFEDE4D7), disabledForegroundColor: ink,
+      minimumSize: const Size(0, 48), padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+    child: Text(correct ? '✓ $label' : label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
   );
 }

@@ -6,10 +6,11 @@ class PlayerProgress {
   int spent, coins, limit;
   bool music, voice, effects;
   String wearing, daily;
+  int lastWorld = 0;
   int get balance => coins - spent;
   int get total => stars.values.fold(0,(a,b)=>a+b);
   // همهٔ مراحل همیشه باز هستند — قفل برداشته شد
   bool open(int w,int l) => true;
-  Map<String,dynamic> toJson()=> {'stars':stars,'owned':owned.toList(),'spent':spent,'coins':coins,'limit':limit,'music':music,'voice':voice,'effects':effects,'wearing':wearing,'daily':daily};
-  factory PlayerProgress.fromJson(Map<String,dynamic> j)=> PlayerProgress(Map<String,int>.from(j['stars'] as Map), Set<String>.from(j['owned'] as List),j['spent'] as int,j['coins'] as int,j['limit'] as int,j['music'] as bool,j['voice'] as bool,j['effects'] as bool,j['wearing'] as String,j['daily'] as String);
+  Map<String,dynamic> toJson()=> {'stars':stars,'owned':owned.toList(),'spent':spent,'coins':coins,'limit':limit,'music':music,'voice':voice,'effects':effects,'wearing':wearing,'daily':daily,'lastWorld':lastWorld};
+  factory PlayerProgress.fromJson(Map<String,dynamic> j)=> PlayerProgress(Map<String,int>.from(j['stars'] as Map), Set<String>.from(j['owned'] as List),j['spent'] as int,j['coins'] as int,j['limit'] as int,j['music'] as bool,j['voice'] as bool,j['effects'] as bool,j['wearing'] as String,j['daily'] as String)..lastWorld = (j['lastWorld'] as int? ?? 0).clamp(0, 4).toInt();
 }

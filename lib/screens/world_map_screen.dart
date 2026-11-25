@@ -5,6 +5,16 @@ import '../models/question.dart';
 import '../models/world.dart';
 import '../theme/app_theme.dart';
 import 'level_screen.dart';
+import '../widgets/owl_character.dart';
+
+int _nextLevel(Map<String,int> stars, int world) {
+  for (var target = 1; target <= 3; target += 2) {
+    for (var i = 0; i < 10; i++) {
+      if ((stars['$world:$i'] ?? 0) < target) return i;
+    }
+  }
+  return 9;
+}
 
 const worldEmojis = ['🌲','☁️','🏰','⚙️','⏰'];
 const worldDescriptions = [
@@ -20,32 +30,20 @@ class WorldMapScreen extends StatelessWidget {
   @override Widget build(BuildContext context){
     final g=GameScope.of(context);
     return Sky(title:'🗺️ نقشهٔ دنیاها',child:ListView(padding:const EdgeInsets.fromLTRB(18,12,18,24),children:[
-      Container(
-        padding:const EdgeInsets.all(16),
-        margin:const EdgeInsets.only(bottom:16),
-        decoration:BoxDecoration(
-          gradient:const LinearGradient(colors:[Color(0xFF6C5CE7),Color(0xFFA29BFE)]),
-          borderRadius:BorderRadius.circular(20),
-          boxShadow:[BoxShadow(color:const Color(0xFF6C5CE7).withValues(alpha:0.3),offset:const Offset(0,4),blurRadius:10)],
-        ),
-        child:const Row(
-          mainAxisAlignment:MainAxisAlignment.center,
-          children:[
-            Text('🌈 همهٔ دنیاها باز هستند!',style:TextStyle(fontSize:20,fontWeight:FontWeight.bold,color:Colors.white)),
-          ],
-        ),
-      ),
+      PlayButton('ادامهٔ بازی',g.locked?null:()=>go(context,LevelScreen(g.p.lastWorld,_nextLevel(g.p.stars,g.p.lastWorld),Mode.story))),
+      const SizedBox(height:12),
       for(var i=0;i<worlds.length;i++)...[
-        _WorldCard(
+        Align(alignment:i.isEven?Alignment.centerRight:Alignment.centerLeft,child:FractionallySizedBox(widthFactor:.91,child:_WorldCard(
           index:i,
           name:worlds[i],
-          emoji:worldEmojis[i],
+          current:g.p.lastWorld==i,
+          wearing:g.p.wearing,
           description:worldDescriptions[i],
           color:worldColors[i],
           stars:g.p.stars,
           onTap:g.locked?null:()=>go(context,_Trail(i)),
-        ),
-        if(i<worlds.length-1)const SizedBox(height:4,child:Center(child:Icon(Icons.expand_more,color:Colors.grey,size:20))),
+        ))),
+        if(i<worlds.length-1)SizedBox(height:31,child:CustomPaint(painter:_WorldConnector(i.isEven))),
       ],
       if(g.p.stars['0:9']==3) _BadgeCard('🏅','نشان استاد ساعت','همهٔ مراحل جنگل را با سه ستاره کامل کردی',const Color(0xFF00B894)),
       if(g.p.stars['3:9']==3) _BadgeCard('🏅','نشان دقیقه‌شناس','همهٔ مراحل دقیقه‌ها را با سه ستاره کامل کردی',const Color(0xFF0984E3)),
@@ -54,22 +52,35 @@ class WorldMapScreen extends StatelessWidget {
   }
 }
 
+class _WorldConnector extends CustomPainter {
+  const _WorldConnector(this.right);
+  final bool right;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = const Color(0xFF805738);
+    for (var i = 0; i < 4; i++) {
+      final dx = (1.5 - i) * (right ? 8 : -8);
+      canvas.drawCircle(Offset(size.width / 2 + dx, 4 + i * 7.0), 2.4, paint);
+    }
+  }
+  @override
+  bool shouldRepaint(covariant _WorldConnector oldDelegate) => oldDelegate.right != right;
+}
+
 class _WorldCard extends StatelessWidget {
   final int index;
-  final String name, emoji, description;
+  final String name, wearing, description;
+  final bool current;
   final Color color;
   final Map<String,int> stars;
   final VoidCallback? onTap;
-  const _WorldCard({required this.index,required this.name,required this.emoji,required this.description,required this.color,required this.stars,required this.onTap});
+  const _WorldCard({required this.index,required this.name,required this.wearing,required this.current,required this.description,required this.color,required this.stars,required this.onTap});
   @override Widget build(BuildContext context){
     final totalStars = List.generate(10,(l)=>stars['$index:$l']??0).fold<int>(0,(a,b)=>a+b);
     return Container(
       margin:const EdgeInsets.only(bottom:8),
       decoration:BoxDecoration(
-        gradient:LinearGradient(
-          begin:Alignment.topLeft,end:Alignment.bottomRight,
-          colors:[color.withValues(alpha:0.9),color.withValues(alpha:0.6)],
-        ),
+        gradient:LinearGradient(colors:[Color.lerp(paper,color,.14)!,Color.lerp(paper,color,.27)!]),
         borderRadius:BorderRadius.circular(24),
         boxShadow:[BoxShadow(color:color.withValues(alpha:0.3),offset:const Offset(0,6),blurRadius:12)],
         border:Border.all(color:Colors.white.withValues(alpha:0.3),width:2),
@@ -83,35 +94,33 @@ class _WorldCard extends StatelessWidget {
             padding:const EdgeInsets.all(16),
             child:Row(
               children:[
-                Container(
-                  width:64,height:64,
-                  decoration:BoxDecoration(
-                    color:Colors.white.withValues(alpha:0.25),
-                    borderRadius:BorderRadius.circular(18),
-                    border:Border.all(color:Colors.white.withValues(alpha:0.4),width:2),
-                  ),
-                  child:Center(child:Text(emoji,style:const TextStyle(fontSize:36))),
-                ),
+                ClipRRect(borderRadius:BorderRadius.circular(14),child:Stack(
+                  alignment:Alignment.bottomCenter,
+                  children:[
+                    Image.asset(worldBgAssets[index],width:78,height:88,fit:BoxFit.cover),
+                    if(current) Owl(size:52,mood:OwlMood.curious,wearing:wearing),
+                  ],
+                )),
                 const SizedBox(width:14),
                 Expanded(
                   child:Column(
                     crossAxisAlignment:CrossAxisAlignment.start,
                     children:[
-                      Text(name,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900,color:Colors.white)),
+                      Text(name,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900,color:ink)),
                       const SizedBox(height:2),
-                      Text(description,style:TextStyle(fontSize:13,color:Colors.white.withValues(alpha:0.85))),
+                      Text(description,style:const TextStyle(fontSize:13,color:ink)),
                       const SizedBox(height:4),
                       Row(
                         children:[
                           const Icon(Icons.star,color:Color(0xFFFFD93D),size:16),
                           const SizedBox(width:4),
-                          Text('$totalStars / ۳۰ ستاره',style:TextStyle(fontSize:12,color:Colors.white.withValues(alpha:0.9),fontWeight:FontWeight.bold)),
+                          Text('${fa(totalStars)} / ۳۰ ستاره',style:const TextStyle(fontSize:12,color:ink,fontWeight:FontWeight.bold)),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_left,color:Colors.white,size:28),
+                const Icon(Icons.chevron_left,color:ink,size:28),
               ],
             ),
           ),
