@@ -1,7 +1,7 @@
 name: clock_game_fa
 description: Persian analog clock learning game
 publish_to: none
-version: 1.2.0+3
+version: 1.3.0+4
 environment:
   sdk: '>=3.5.0 <4.0.0'
 dependencies:
@@ -30,3 +30,6 @@ flutter:
         - asset: assets/fonts/Vazirmatn-Regular.ttf
         - asset: assets/fonts/Vazirmatn-Bold.ttf
           weight: 700
+    - family: Lalezar
+      fonts:
+        - asset: assets/fonts/Lalezar-Regular.ttf

@@ -79,19 +79,20 @@ class _LevelScreenState extends State<LevelScreen> with SingleTickerProviderStat
     ]))),PlayButton('بازگشت',()=>Navigator.pop(context))]),if(!expired&&!MediaQuery.of(context).disableAnimations)const Positioned.fill(child:IgnorePointer(child:ConfettiOverlay()))]));
     final callback=won?null:answer;
     return Sky(title:title,world:widget.world,child:ListView(controller:scroll,padding:const EdgeInsets.fromLTRB(12,4,12,16),children:[
-      Card(color:paper,margin:EdgeInsets.zero,child:Padding(padding:const EdgeInsets.fromLTRB(10,8,10,6),child:Column(children:[
+      Container(decoration:BoxDecoration(color:const Color(0xFFFFF5DB),borderRadius:BorderRadius.circular(23),border:Border.all(color:const Color(0xFFAA7036),width:2),boxShadow:const [BoxShadow(color:Color(0x50362B20),blurRadius:8,offset:Offset(0,3))]),child:Padding(padding:const EdgeInsets.fromLTRB(10,9,10,9),child:Column(children:[
         LinearProgressIndicator(value:(index+(won?1:0))/questions.length,semanticsLabel:'پیشرفت بازی',minHeight:6,borderRadius:BorderRadius.circular(8)),
+        const SizedBox(height:6),
         Row(children:[
-          Owl(size:48,wearing:g.p.wearing,mood:won?OwlMood.happy:wrong?OwlMood.encouraging:OwlMood.thinking),
+          Owl(size:50,wearing:g.p.wearing,mood:won?OwlMood.happy:wrong?OwlMood.encouraging:OwlMood.thinking),
           const SizedBox(width:6),
-          Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[
-            Text('پرسش ${fa(index+1)} از ${fa(questions.length)}${daily?' • ${fa(seconds)} ثانیه':''}${duo?' • نوبت ${index.isEven?'سارا':'آراد'}':''}',style:const TextStyle(fontSize:12,fontWeight:FontWeight.bold)),
-            Text(prompt,style:const TextStyle(fontSize:17,fontWeight:FontWeight.bold,height:1.35)),
-          ])),
-          IconButton(tooltip:'شنیدن پرسش',onPressed:()=>repeatVoice(prompt),icon:const Icon(Icons.volume_up_rounded)),
+          Expanded(child:Text('تیکو می‌پرسد',style:const TextStyle(fontFamily:'Lalezar',fontSize:23,color:Color(0xFF174A4F)))),
+          IconButton(tooltip:'شنیدن پرسش',onPressed:()=>repeatVoice(prompt),icon:const Icon(Icons.volume_up_rounded,color:Color(0xFF174A4F))),
         ]),
-        if(won||wrong) AnimatedBuilder(animation:motion,builder:(context,child)=>Transform.translate(offset:Offset(wrong?sin(motion.value*pi*6)*4*(1-motion.value):0,0),child:child),child:Semantics(liveRegion:true,child:Text(won?'✓ آفرین! پاسخ درست!':hint,textAlign:TextAlign.center,style:TextStyle(fontSize:14,fontWeight:FontWeight.bold,color:won?const Color(0xFF246839):const Color(0xFF8A431F))))),
-        if(voiceMissing)const Text('صدای فارسی دستگاه در دسترس نیست یا خاموش است.',style:TextStyle(fontSize:12)),
+        Text('پرسش ${fa(index+1)} از ${fa(questions.length)}${daily?' • ${fa(seconds)} ثانیه':''}${duo?' • نوبت ${index.isEven?'سارا':'آراد'}':''}',textAlign:TextAlign.center,style:const TextStyle(fontSize:15,color:ink,fontWeight:FontWeight.bold)),
+        const SizedBox(height:5),
+        Container(width:double.infinity,padding:const EdgeInsets.symmetric(horizontal:10,vertical:7),decoration:BoxDecoration(color:const Color(0xFFFFEBC0),borderRadius:const BorderRadiusDirectional.only(topStart:Radius.circular(5),topEnd:Radius.circular(18),bottomStart:Radius.circular(18),bottomEnd:Radius.circular(18)),border:Border.all(color:const Color(0xFFBE874A))),child:Text(prompt,textAlign:TextAlign.center,style:const TextStyle(fontFamily:'Vazirmatn',fontSize:24,color:ink,fontWeight:FontWeight.bold,height:1.4))),
+        if(won||wrong) AnimatedBuilder(animation:motion,builder:(context,child)=>Transform.translate(offset:Offset(wrong?sin(motion.value*pi*6)*4*(1-motion.value):0,0),child:child),child:Semantics(liveRegion:true,child:Text(won?'✓ آفرین! پاسخ درست!':hint,textAlign:TextAlign.center,style:TextStyle(fontSize:17,fontWeight:FontWeight.bold,color:won?const Color(0xFF246839):const Color(0xFF8A431F))))),
+        if(voiceMissing)const Text('صدای فارسی دستگاه در دسترس نیست یا خاموش است.',style:TextStyle(fontSize:14,color:ink)),
       ]))),
       const SizedBox(height:8),
       KeyedSubtree(key:ValueKey(index),child:switch(q.task){Task.read=>ReadClockScreen(q,callback),Task.set=>SetClockScreen(callback,target:q.answer),Task.math=>TimeMathScreen(q,callback)}),

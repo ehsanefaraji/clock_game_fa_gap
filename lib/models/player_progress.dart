@@ -7,6 +7,15 @@ class PlayerProgress {
   bool music, voice, effects;
   String wearing, daily;
   int lastWorld = 0;
+  bool completedWorld(int world) => List.generate(10, (i) => stars['$world:$i'] ?? 0).every((count) => count > 0);
+  int get nextStoryLevel {
+    for (final minimum in [1, 3]) {
+      for (var i = 0; i < 10; i++) {
+        if ((stars['$lastWorld:$i'] ?? 0) < minimum) return i;
+      }
+    }
+    return 9;
+  }
   int get balance => coins - spent;
   int get total => stars.values.fold(0,(a,b)=>a+b);
   // همهٔ مراحل همیشه باز هستند — قفل برداشته شد

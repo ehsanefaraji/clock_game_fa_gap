@@ -41,6 +41,19 @@ void main() {
       }
     }
   });
+  test('Tiko badges require every level and progress restores the latest world', () {
+    final p=PlayerProgress.empty()..lastWorld=3;
+    for(var i=0;i<9;i++){p.stars['3:$i']=1;}
+    expect(p.completedWorld(3),isFalse);
+    expect(p.nextStoryLevel,9);
+    p.stars['3:9']=1;
+    final restored=PlayerProgress.fromJson(p.toJson());
+    expect(restored.lastWorld,3);
+    expect(restored.completedWorld(3),isTrue);
+    expect(restored.completedWorld(0),isFalse);
+    expect(restored.nextStoryLevel,0);
+    expect(PlayerProgress.fromJson(p.toJson()..remove('lastWorld')).lastWorld,0);
+  });
   test('all levels unlocked and profile fields persist', () {
     final p=PlayerProgress.empty();
     expect(p.open(0,0),isTrue);

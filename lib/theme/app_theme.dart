@@ -16,7 +16,7 @@ const worldBgAssets = [
 ];
 ThemeData theme() {
   final base = ThemeData(useMaterial3:true,fontFamily:'Vazirmatn',colorScheme:ColorScheme.fromSeed(seedColor:magicPurple).copyWith(onSurface:ink),scaffoldBackgroundColor:Colors.transparent);
-  return base.copyWith(textTheme:base.textTheme.apply(bodyColor:ink,displayColor:ink).copyWith(bodyMedium:const TextStyle(fontSize:18,height:1.5),bodyLarge:const TextStyle(fontSize:20,height:1.5),titleLarge:const TextStyle(fontSize:24,fontWeight:FontWeight.w700,height:1.5)),appBarTheme:const AppBarTheme(backgroundColor:Colors.transparent,foregroundColor:ink,centerTitle:true,titleTextStyle:TextStyle(fontFamily:'Vazirmatn',color:ink,fontSize:24,fontWeight:FontWeight.bold)));
+  return base.copyWith(textTheme:base.textTheme.apply(bodyColor:ink,displayColor:ink).copyWith(bodyMedium:const TextStyle(fontSize:18,height:1.5),bodyLarge:const TextStyle(fontSize:20,height:1.5),titleLarge:const TextStyle(fontSize:24,fontWeight:FontWeight.w700,height:1.5)),appBarTheme:const AppBarTheme(backgroundColor:Color(0xFFFFF3D7),foregroundColor:ink,centerTitle:true,titleTextStyle:TextStyle(fontFamily:'Lalezar',color:ink,fontSize:27)));
 }
 class Sky extends StatelessWidget {
   const Sky({super.key,required this.title,required this.child,this.world = -1});
@@ -30,7 +30,7 @@ class Sky extends StatelessWidget {
         image: bg != null ? DecorationImage(image: AssetImage(bg), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.35), BlendMode.darken)) : null,
         gradient: bg == null ? const LinearGradient(
           begin:Alignment.topCenter, end:Alignment.bottomCenter,
-          colors:[Color(0xFFA29BFE), Color(0xFFDFE6FD), Color(0xFFFFEAA7), Color(0xFFFAB1A0)],
+          colors:[Color(0xFFBCECE0), Color(0xFFDBF2DF), Color(0xFFFFEBC2), Color(0xFFFFD5AB)],
           stops:[0.0, 0.3, 0.7, 1.0],
         ) : null,
       ),

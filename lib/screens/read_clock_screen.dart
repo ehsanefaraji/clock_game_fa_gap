@@ -101,6 +101,6 @@ class _Choice extends StatelessWidget {
       disabledBackgroundColor: correct ? const Color(0xFFBDDFB5) : const Color(0xFFEDE4D7), disabledForegroundColor: ink,
       minimumSize: const Size(0, 48), padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-    child: Text(correct ? '✓ $label' : label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+    child: Text(correct ? '✓ $label' : label, textAlign: TextAlign.center, style: const TextStyle(fontSize:18, fontWeight: FontWeight.bold)),
   );
 }
