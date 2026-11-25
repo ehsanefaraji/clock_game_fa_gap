@@ -1,7 +1,6 @@
 import 'dart:math';
 
 String fa(Object value) => '$value'.replaceAllMapped(RegExp('[0-9]'), (m) => '۰۱۲۳۴۵۶۷۸۹'[int.parse(m[0]!)]);
-// FIX: اعداد منفی را هم درست مدیریت کن — ((t % 720) + 720) % 720 همیشه ۰-۷۱۹ برمی‌گرداند
 int wrapTime(int t) => ((t % 720) + 720) % 720;
 const hourWords = ['دوازده','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه','ده','یازده'];
 const minuteWords = ['صفر','پنج','ده','پانزده','بیست','بیست و پنج','سی','سی و پنج','چهل','چهل و پنج','پنجاه','پنجاه و پنج'];
@@ -33,26 +32,23 @@ class Question {
       int start, answer, delta;
       do {
         start = random.nextInt(12)*60 + offsets[random.nextInt(offsets.length)];
-        delta = task == Task.math ? [5,10,15,30,60,75][random.nextInt(level < 4 ? 4 : 6)] : 0;
+        // فقط دلتاهای کوچک و قابل محاسبه برای کودک: 5، 10، 15، 30، 60 دقیقه
+        delta = task == Task.math ? [5,10,15,30,60][random.nextInt(5)] : 0;
         answer = wrapTime(start + delta);
       } while (!used.add(answer));
-      // گزینه‌های متنوع: ساعت و دقیقهٔ متفاوت
       final candidates = <int>{answer};
       candidates.add(wrapTime(answer + 5));
       candidates.add(wrapTime(answer - 5));
-      // گزینهٔ چهارم: تضمین ساعت متفاوت
       final answerHour = (answer ~/ 60) % 12;
       while (candidates.length < 4) {
         final dh = 1 + random.nextInt(11);
         final dm = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55][random.nextInt(11)];
         final candidate = wrapTime(answer + dh * 60 + dm);
         final candidateHour = (candidate ~/ 60) % 12;
-        // تضمین: حداقل یک گزینه ساعت متفاوت دارد
         if (candidateHour != answerHour || candidates.where((c) => (c ~/ 60) % 12 != answerHour).length >= 1) {
           candidates.add(candidate);
         }
       }
-      // همه گزینه‌ها را با wrapTime نرمال‌سازی کن
       return Question(answer, task, candidates.map(wrapTime).toList()..shuffle(random),start:start,delta:delta);
     });
   }
