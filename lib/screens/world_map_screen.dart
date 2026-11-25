@@ -159,7 +159,7 @@ class _Trail extends StatelessWidget {
     return Sky(title:'${worldEmojis[world]} ${worlds[world]}',world:world,child:SingleChildScrollView(
       padding:const EdgeInsets.all(14),
       child:CustomPaint(
-        painter:_FantasyPath(color),
+        painter:_FantasyPath(color,world),
         child:Column(children:[
           for(var i=0;i<10;i++)
             SizedBox(height:100,child:Align(alignment:Alignment(pathX(i,world),0),child:_LevelNode(
@@ -210,8 +210,9 @@ class _LevelNode extends StatelessWidget {
 }
 
 class _FantasyPath extends CustomPainter {
-  _FantasyPath(this.color);
+  _FantasyPath(this.color,this.world);
   final Color color;
+  final int world;
   @override void paint(Canvas canvas,Size size){
     final p=Path();
     Offset pt(int i)=>Offset(size.width/2+_Trail.pathX(i,world)*(size.width-150)/2,50.0+i*100);
