@@ -152,7 +152,7 @@ class _BadgeCard extends StatelessWidget {
 class _Trail extends StatelessWidget {
   const _Trail(this.world);
   final int world;
-  static double pathX(int i)=>sin(i*.88+world*.3)*.62;
+  static double pathX(int i,int w)=>sin(i*.88+w*.3)*.62;
   @override Widget build(BuildContext context){
     final g=GameScope.of(context);
     final color=worldColors[world];
@@ -162,7 +162,7 @@ class _Trail extends StatelessWidget {
         painter:_FantasyPath(color),
         child:Column(children:[
           for(var i=0;i<10;i++)
-            SizedBox(height:100,child:Align(alignment:Alignment(pathX(i),0),child:_LevelNode(
+            SizedBox(height:100,child:Align(alignment:Alignment(pathX(i,world),0),child:_LevelNode(
               world:world,level:i,color:color,stars:g.p.stars['$world:$i']??0,
               onTap:g.locked?null:()=>go(context,LevelScreen(world,i,Mode.story)),
             ))),
@@ -214,7 +214,7 @@ class _FantasyPath extends CustomPainter {
   final Color color;
   @override void paint(Canvas canvas,Size size){
     final p=Path();
-    Offset pt(int i)=>Offset(size.width/2+_Trail.pathX(i)*(size.width-150)/2,50.0+i*100);
+    Offset pt(int i)=>Offset(size.width/2+_Trail.pathX(i,world)*(size.width-150)/2,50.0+i*100);
     p.moveTo(pt(0).dx,pt(0).dy);
     for(var i=1;i<10;i++){
       final a=pt(i-1),b=pt(i);
