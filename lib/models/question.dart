@@ -14,7 +14,6 @@ String words(int t) {
     0 => 'ساعت $hour',
     15 => '$hour و ربع',
     30 => '$hour و نیم',
-    45 => 'یک ربع به ${hourWords[(h + 1) % 12]}',
     55 => 'پنج دقیقه به ${hourWords[(h + 1) % 12]}',
     _ => '$hour و ${m % 5 == 0 ? minuteWords[m ~/ 5] : fa(m)} دقیقه',
   };
@@ -41,10 +40,17 @@ class Question {
       final candidates = <int>{answer};
       candidates.add(wrapTime(answer + 5));
       candidates.add(wrapTime(answer - 5));
+      // گزینهٔ چهارم: تضمین ساعت متفاوت
+      final answerHour = (answer ~/ 60) % 12;
       while (candidates.length < 4) {
         final dh = 1 + random.nextInt(11);
         final dm = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55][random.nextInt(11)];
-        candidates.add(wrapTime(answer + dh * 60 + dm));
+        final candidate = wrapTime(answer + dh * 60 + dm);
+        final candidateHour = (candidate ~/ 60) % 12;
+        // تضمین: حداقل یک گزینه ساعت متفاوت دارد
+        if (candidateHour != answerHour || candidates.where((c) => (c ~/ 60) % 12 != answerHour).length >= 1) {
+          candidates.add(candidate);
+        }
       }
       // همه گزینه‌ها را با wrapTime نرمال‌سازی کن
       return Question(answer, task, candidates.map(wrapTime).toList()..shuffle(random),start:start,delta:delta);
